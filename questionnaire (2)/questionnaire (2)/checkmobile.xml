@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<BL>
+  <Actions>
+    <Action name="开始" type="START" for="" next="读取数据" desc="">
+      <DBConnection name="dsfa" trans="false"/>
+    </Action>
+    <Action name="读取数据" type="SQL_QUERY" for="" next="结束" desc="">
+      <Expression>
+        <Sql>
+          <![CDATA[
+      SELECT COUNT(*) cnt FROM  login_info WHERE mobile=?
+					]]>
+        </Sql>
+        <Parameters>
+          <Parameter name="mobile" type="STRING">{@mobile}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="login_info" key="cnt">
+        <Data format="" name="cnt">cnt</Data>
+      </DataSet>
+    </Action>
+    <Action name="结束" type="END" for="" next="" desc="">
+      <Element>login_info</Element>
+    </Action>
+  </Actions>
+</BL>

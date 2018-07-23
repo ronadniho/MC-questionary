@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<BL>
+  <Actions>
+    <Action name="开始" type="START" for="" next="get_veri_info" desc="">
+      <DBConnection name="dsfa" trans="false"/>
+    </Action>
+    <Action name="get_veri_info" type="SQL_QUERY" for="" next="check_veri_code" desc="">
+      <Expression>
+        <Sql>
+          <![CDATA[
+            SELECT veri_code,mobile, TIMESTAMPDIFF(MINUTE,create_date,now()) as m_diff, create_date,
+              now() as sdate,veri_code as rnd
+            FROM mobile_verification WHERE mobile=? 
+            ORDER BY create_date DESC LIMIT 1
+					]]>
+        </Sql>
+        <Parameters>
+          <Parameter name="mobile" type="STRING">{@mobile}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="rows" key="">
+        <Data format="" name="veri_code">veri_code</Data>
+        <Data format="" name="m_diff">m_diff</Data>
+        <Data format="yyyy年MM月dd日" name="sysdate">sdate</Data>
+        <Data format="" name="new_veri_code">rnd</Data>
+      </DataSet>
+    </Action>
+
+    <Action name="check_veri_code" type="SWITCH" for="" next="end" desc="">
+      <Switch>
+        <Rule expression="'{@rows/veri_code}'==''" next="new_veri_code" desc=""/>
+        <Rule expression="'1'=='1'" next="check_minutes" desc=""/>
+      </Switch>
+    </Action>
+
+    <Action name="check_minutes" type="SWITCH" for="" next="end" desc="" >
+      <Switch>
+        <Rule expression="{@rows/m_diff}&gt;10" next="new_veri_code" desc="大于10分钟，生成新的校验码"/>
+        <Rule expression="'1'=='1'" next="create_msg" desc="不新生成校验码"/>
+      </Switch>
+    </Action>
+
+    <Action name="new_veri_code" type="SQL_EXECUTE" for="" next="get_veri_info" desc="">
+      <Expression>
+        <Sql>
+          <![CDATA[
+            INSERT INTO mobile_verification(id,mobile,veri_code,create_date) 
+            values(?,?,(select right(cast(round(rand(),4) as char),4) from dual),now())
+					]]>
+        </Sql>
+        <Parameters>
+          <Parameter name="id" type="STRING">{%GUID:N}</Parameter>
+          <Parameter name="mobile" type="STRING">{@mobile}</Parameter>
+        </Parameters>
+      </Expression>
+    </Action>
+
+    <Action name="create_msg" type="EXPRESSION" for="" next="send_msg" desc="生成短信内容">
+      <Expression language="JavaScript">
+        <![CDATA[
+          var code = "{@rows/veri_code}";
+          if({@rows/m_diff}>10){
+              code="{@rows/new_veri_code}";
+          }
+          var msg = "【创客中国】您于{@rows/sysdate}{@yzm_des}，验证码:"+code+"，10分钟有效。";
+        ]]>
+      </Expression>
+      <DataSet name="content" key="" parentkey="">
+        <Data format="" name="msg">msg</Data>
+      </DataSet>
+    </Action>
+
+    <Action name="send_msg" type="JAVA_METHOD" for="" next="end" desc="发送短信">
+      <Expression name="send">
+        <Class>
+          dsfa.sms.SmsAction
+        </Class>
+        <Parameters>
+          <Parameter name="msg" type="STRING">{@content/msg}</Parameter>
+          <Parameter name="targets" type="STRING">{@mobile}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="result" key="" parentkey="" type="STRING">
+        <Data format="" name="">*</Data>
+      </DataSet>
+    </Action>
+
+    <Action name="end" type="END" for="" next="" desc="">
+      <Element>result</Element>
+    </Action>
+  </Actions>
+</BL>

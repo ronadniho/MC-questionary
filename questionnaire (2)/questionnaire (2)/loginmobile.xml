@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<BL>
+  <Actions>
+    <Action name="开始" type="START" for="" next="读取数据" desc="">
+      <DBConnection name="dsfa" trans="false"/>
+    </Action>
+    <Action name="读取数据" type="SQL_QUERY" for="" next="set_session" desc="">
+      <Expression>
+        <Sql>
+          <![CDATA[
+      SELECT l.id,l.user_id,l.user_cd,l.user_type,l.user_name,l.mobile,u.email FROM login_info l
+left join user_info u on u.id = l.user_id
+WHERE  l.mobile=?
+					]]>
+        </Sql>
+        <Parameters>
+          <Parameter name="mobile" type="STRING">{@mobile}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="login_info" key="id">
+        <Data format="" name="id">id</Data>
+        <Data format="" name="user_id">user_id</Data>
+        <Data format="" name="user_cd">user_cd</Data>
+        <Data format="" name="user_type">user_type</Data>
+        <Data format="" name="mobile">mobile</Data>
+		<Data format="" name="username">username</Data>
+		<Data format="" name="email">email</Data>
+      </DataSet>
+    </Action>
+
+
+
+    <Action name="set_session" type="SERVER_OBJECT" for="" next="successlogin" desc="">
+      <Expression>
+        <Session name="userid">{@login_info/user_id}</Session>
+        <Session name="usercd">{@login_info/user_cd}</Session>
+        <Session name="usertype">{@login_info/user_type}</Session>
+        <Session name="mobile">{@login_info/mobile}</Session>
+		<Session name="usertype">{@login_info/username}</Session>
+        <Session name="mobile">{@login_info/email}</Session>
+      </Expression>
+    </Action>
+
+
+    <Action name="successlogin" type="EXPRESSION" for="" next="结束" desc="">
+      <Expression language="JavaScript">
+        <![CDATA[
+          var result = "1";
+        ]]>
+      </Expression>
+      <DataSet name="result" key="" parentkey="">
+        <Data format="" name="status">result</Data>
+      </DataSet>
+    </Action>
+
+   
+
+    <Action name="结束" type="END" for="" next="" desc="">
+      <Element>login_info</Element>
+      <Element>result</Element>
+    </Action>
+  </Actions>
+</BL>

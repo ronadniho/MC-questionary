@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<BL>
+  <Actions>
+    <Action name="开始" type="START" for="" next="判断" desc="">
+      <DBConnection name="dsfa" trans="true" />
+    </Action>
+    <Action name="判断" type="SWITCH" for="" next="结束" desc="">
+      <Switch>
+        <Rule expression="'{@actionType}'=='create_questionnaire'" desc="" next="create_quesid" />
+        <Rule expression="'{@actionType}'=='query_all_questionnaire'" desc="" next="query_all_count_questionnaire" />
+        <Rule expression="'{@actionType}'=='query_questionnaire'" desc="" next="query_questionnaire" />
+        <Rule expression="'{@actionType}'=='query_questionnaire_detail'" desc="" next="query_questionnaire_detail" />
+        <Rule expression="'{@actionType}'=='update_questionnaire'" desc="" next="update_questionnaire" />
+      </Switch>
+    </Action>
+    
+    <Action name="create_quesid" type="EXPRESSION" for="" next="查找该数据是否存在" desc="">
+      <Expression language="JavaScript">
+        var guid = '{%GUID:N}';
+      </Expression>
+      <DataSet name="quesid" key="" parentkey="">
+        <Data format="" name="questionnid">guid</Data>
+      </DataSet>
+    </Action>
+    <Action name="查找该数据是否存在" type="SQL_QUERY" for="" next="判断该数据是否存在" desc="">
+      <Expression>
+        <Sql>
+          <![CDATA[
+          select id from questionnaire where proname=? and compename=?
+					]]>
+        </Sql>
+        <Parameters>
+          <Parameter name="proname" type="STRING">{@proname}</Parameter>
+          <Parameter name="compename" type="STRING">{@compename}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="makerp" key="" parentkey="">
+        <Data format="" name="mid">id</Data>
+      </DataSet>
+    </Action>
+
+    <Action name="判断该数据是否存在" type="SWITCH" for="" next="结束">
+      <Switch>
+        <Rule expression="'{@makerp/mid}'!=''" next="数据存在不再插入数据" desc=""/>
+        <Rule expression="'1'=='1'" next="create_questionnaire" desc=""/>
+      </Switch>
+    </Action>
+    <Action name="create_questionnaire" type="SQL_EXECUTE" for="" next="结束" desc="create_questionnaire">
+      <Expression>
+        <Sql><![CDATA[insert into questionnaire(id,userid,proname,compename,create_date,province,city,dlist,ztype,compeyear,awardwinning,tutordetail,landdetail,hopefinanc,hopecopunit,isgetfinanc,investor,suppfinanc,share,amountfinanc) values(?,?,?,?,NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)]]></Sql>
+        <Parameters>
+          <Parameter name="id" type="STRING">{@questionnid}</Parameter>
+          <Parameter name="userid" type="STRING">{@userid}</Parameter>
+          <Parameter name="proname" type="STRING">{@proname}</Parameter>
+          <Parameter name="compename" type="STRING">{@compename}</Parameter>
+          <Parameter name="province" type="STRING">{@province}</Parameter>
+          <Parameter name="city" type="STRING">{@city}</Parameter>
+          <Parameter name="dlist" type="STRING">{@dlist}</Parameter>
+          <Parameter name="ztype" type="STRING">{@ztype}</Parameter>
+          <Parameter name="compeyear" type="STRING">{@compeyear}</Parameter>
+          <Parameter name="awardwinning" type="STRING">{@awardwinning}</Parameter>
+          <Parameter name="tutordetail" type="STRING">{@tutordetail}</Parameter>
+          <Parameter name="landdetail" type="STRING">{@landdetail}</Parameter>
+          <Parameter name="hopefinanc" type="INT">{@hopefinanc}</Parameter>
+          <Parameter name="hopecopunit" type="STRING">{@hopecopunit}</Parameter>
+          <Parameter name="isgetfinanc" type="NUMBER">{@isgetfinanc}</Parameter>
+          <Parameter name="investor" type="STRING">{@investor}</Parameter>
+          <Parameter name="suppfinanc" type="NUMBER">{@suppfinanc}</Parameter>
+          <Parameter name="share" type="NUMBER">{@share}</Parameter>
+          <Parameter name="amountfinanc" type="NUMBER">{@amountfinanc}</Parameter>
+        </Parameters>
+      </Expression>
+    </Action>
+    
+    <Action name="query_all_count_questionnaire" type="SQL_QUERY" for="" next="query_questionnaire" desc="query_all_count_questionnaire">
+      <Expression>
+        <Sql><![CDATA[select  COUNT(ID) AS NUM from questionnaire   ]]></Sql>
+        <Parameters />
+      </Expression>
+      <DataSet name="questionnaire_num" key="" parentkey="">
+        <Data format="" name="NUM">NUM</Data>
+      </DataSet>
+    </Action>
+    <Action name="query_questionnaire" type="SQL_QUERY" for="" next="结束" desc="query_questionnaire">
+      <Expression>
+        <Sql><![CDATA[select id,userid,proname,compename,create_date,province,city,dlist,ztype,compeyear,compeyear,awardwinning,tutordetail,landdetail,hopefinanc,hopecopunit,isgetfinanc,investor,suppfinanc,share,amountfinanc from questionnaire LIMIT ?,?  ]]></Sql>
+        <Parameters>
+          <Parameter name="MINNUM" type="INT">{@MINNUM}</Parameter>
+          <Parameter name="PAGECOUNT" type="INT">{@PAGECOUNT}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="questionnaire" key="{%GUID:N}" parentkey="">
+        <Data format="" name="id">id</Data>
+        <Data format="" name="userid">userid</Data>
+        <Data format="" name="proname">proname</Data>
+        <Data format="" name="compename">compename</Data>
+        <Data format="" name="create_date">create_date</Data>
+        <Data format="" name="province">province</Data>
+        <Data format="" name="city">city</Data>
+        <Data format="" name="dlist">dlist</Data>
+        <Data format="" name="ztype">ztype</Data>
+        <Data format="" name="compeyear">compeyear</Data>
+        <Data format="" name="awardwinning">awardwinning</Data>
+        <Data format="" name="tutordetail">tutordetail</Data>
+        <Data format="" name="landdetail">landdetail</Data>
+        <Data format="" name="hopefinanc">hopefinanc</Data>
+        <Data format="" name="hopecopunit">hopecopunit</Data>
+        <Data format="" name="isgetfinanc">isgetfinanc</Data>
+        <Data format="" name="investor">investor</Data>
+        <Data format="" name="suppfinanc">suppfinanc</Data>
+        <Data format="" name="share">share</Data>
+        <Data format="" name="amountfinanc">amountfinanc</Data>
+      </DataSet>
+    </Action>
+    <Action name="query_questionnaire_detail" type="SQL_QUERY" for="" next="结束" desc="query_questionnaire_detail">
+      <Expression>
+        <Sql><![CDATA[select id,userid,proname,compename,create_date,province,city,dlist,ztype,compeyear,compeyear,awardwinning,tutordetail,landdetail,hopefinanc,hopecopunit,isgetfinanc,investor,suppfinanc,share,amountfinanc from questionnaire  WHERE id = ?  ]]></Sql>
+        <Parameters>
+          <Parameter name="qid" type="STRING">{@qid}</Parameter>
+        </Parameters>
+      </Expression>
+      <DataSet name="questionnaire_detail" key="" parentkey="">
+        <Data format="" name="id">id</Data>
+        <Data format="" name="userid">userid</Data>
+        <Data format="" name="proname">proname</Data>
+        <Data format="" name="compename">compename</Data>
+        <Data format="" name="create_date">create_date</Data>
+        <Data format="" name="province">province</Data>
+        <Data format="" name="city">city</Data>
+        <Data format="" name="dlist">dlist</Data>
+        <Data format="" name="ztype">ztype</Data>
+        <Data format="" name="compeyear">compeyear</Data>
+        <Data format="" name="awardwinning">awardwinning</Data>
+        <Data format="" name="tutordetail">tutordetail</Data>
+        <Data format="" name="landdetail">landdetail</Data>
+        <Data format="" name="hopefinanc">hopefinanc</Data>
+        <Data format="" name="hopecopunit">hopecopunit</Data>
+        <Data format="" name="isgetfinanc">isgetfinanc</Data>
+        <Data format="" name="investor">investor</Data>
+        <Data format="" name="suppfinanc">suppfinanc</Data>
+        <Data format="" name="share">share</Data>
+        <Data format="" name="amountfinanc">amountfinanc</Data>
+      </DataSet>
+    </Action>
+    <Action name="update_questionnaire" type="SQL_EXECUTE" for="" next="结束" desc="update_questionnaire">
+      <Expression>
+        <Sql>
+          <![CDATA[
+        update questionnaire set proname = ?,compename = ?,province = ?,city = ?,dlist = ?,compeyear = ?,awardwinning = ?,tutordetail = ?,landdetail = ?,hopefinanc = ?,
+        hopecopunit = ?,isgetfinanc = ?,investor = ?,suppfinanc = ?,SHARE = ?,amountfinanc = ? WHERE ID = ? ]]></Sql>
+        <Parameters>
+          <Parameter name="proname" type="STRING">{@proname}</Parameter>
+          <Parameter name="compename" type="STRING">{@compename}</Parameter>
+          <Parameter name="province" type="STRING">{@province}</Parameter>
+          <Parameter name="city" type="STRING">{@city}</Parameter>
+          <Parameter name="dlist" type="STRING">{@dlist}</Parameter>
+          <Parameter name="compeyear" type="STRING">{@compeyear}</Parameter>
+          <Parameter name="awardwinning" type="STRING">{@awardwinning}</Parameter>
+          <Parameter name="tutordetail" type="STRING">{@tutordetail}</Parameter>
+          <Parameter name="landdetail" type="STRING">{@landdetail}</Parameter>
+          <Parameter name="hopefinanc" type="STRING">{@hopefinanc}</Parameter>
+          <Parameter name="hopecopunit" type="STRING">{@hopecopunit}</Parameter>
+          <Parameter name="isgetfinanc" type="NUMBER">{@isgetfinanc}</Parameter>
+          <Parameter name="investor" type="STRING">{@investor}</Parameter>
+          <Parameter name="suppfinanc" type="NUMBER">{@suppfinanc}</Parameter>
+          <Parameter name="share" type="STRING">{@share}</Parameter>
+          <Parameter name="amountfinanc" type="NUMBER">{@amountfinanc}</Parameter>
+          <Parameter name="id" type="STRING">{@id}</Parameter>
+        </Parameters>
+      </Expression>
+    </Action>
+
+    <Action name="数据存在不再插入数据" type="EXPRESSION" for="" next="结束" desc="">
+      <Expression language="JavaScript">
+        var dr = '数据存在不再插入数据';
+      </Expression>
+      <DataSet name="ZP" key="" parentkey="">
+        <Data format="" name="isexist">dr</Data>
+      </DataSet>
+    </Action>
+
+    <Action name="结束" type="END" for="" next="" desc="">
+      <Element>questionnaire</Element>
+      <ArrayKey>questionnaire</ArrayKey>
+      <Element>questionnaire_num</Element>
+      <Element>questionnaire_detail</Element>
+      <!--<Element>questionnaire_detail</Element>-->
+      <Element>quesid/questionnid</Element>
+      <Element>ZP/isexist</Element>
+    </Action>
+  </Actions>
+</BL>
